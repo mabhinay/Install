@@ -6,3 +6,6 @@ sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
 sudo yum -y install jenkins
 sudo systemctl enable jenkins
 sudo systemctl start jenkins
+yum -y install maven
+yum -y install git
+yum -y install wget
