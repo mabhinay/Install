@@ -1,0 +1,217 @@
+copy files
+---
+- hosts: all
+  become: true
+  tasks:
+          - name: copy files
+            copy:
+                    src: /root/sample.txt
+                    dest: /root/sample.txt
+
+          - name: message display
+            debug:
+                    msg: Files are copied!
+
+=====================================================================================
+Installing Packages
+---
+- hosts: webserver
+  become: true
+  gather_facts: false
+  tasks:
+          - name: Update repo
+            raw: apt-get update -y
+
+          - name: Install Apache
+            apt: name=apache2 state=latest
+
+          - name: Install Tomcat
+            apt: name=tomcat8 state=latest
+
+- hosts: appserver
+  become: true
+  gather_facts: false
+  tasks:
+          - name: Update repo
+            raw: yum update -y
+
+          - name: Install Httpd
+            yum: name=httpd state=latest
+
+=====================================================================================
+Handlers
+---
+- hosts: webserver
+  become: true
+  gather_facts: false
+  tasks:
+          - name: update repo
+            raw: apt-get install
+
+          - name: install apache2
+            apt: name=apache2 state=latest
+            notify:
+                    - start apache2
+
+          - name: install tomcat8
+            apt: name=tomcat8 state=latest
+            notify:
+                    - start tomcat8
+
+  handlers:
+          - name: start apache2
+            service: name=apache2 state=started
+
+          - name: start tomcat8
+            service: name=tomcat8 state=started
+
+=====================================================================================
+When Condition
+---
+- hosts: all
+  become: true
+  tasks:
+          - name: update repo
+            raw: apt-get update
+            when: ansible_distribution=="Ubuntu"
+          
+	  - name: update repo
+            raw: yum update -y
+            when: ansible_distribution=="RedHat"
+
+          - name: install apache2
+            apt: name=apache2 state=latest
+            when: ansible_distribution=="Ubuntu"
+            notify:
+                    - copy file1
+                    - start apache2
+
+          - name: install httpd
+            yum: name=httpd state=latest
+            when: ansible_distribution=="RedHat"
+            notify:
+                    - copy file2
+                    - start httpd
+
+  handlers:
+          - name: copy file1
+            copy:
+                    src: /root/index.html
+                    dest: /var/www/html
+            when: ansible_distribution=="Ubuntu"
+
+          - name: start apache2
+            service: name=apache2 state=started
+
+          - name: copy file2
+            copy:
+                    src: /tmp/index.html
+                    dest: /var/www/html
+            when: ansible_distribution=="RedHat"
+
+          - name: start httpd
+            service: name=httpd state=started
+
+=====================================================================================
+Install mysql and mariadb server
+---
+- hosts: all
+  become: true
+  gather_facts: true
+  tasks:
+          - name: update repo
+            raw: apt-get update -y
+            when: ansible_distribution=="Ubuntu"
+
+          - name: install mysql server
+            apt: name=mysql-server state=latest
+            when: ansible_distribution=="Ubuntu"
+            notify:
+                    - start mysql
+
+          - name: update repo
+            raw: yum -y update
+            when: ansible_distribution=="RedHat"
+
+          - name: install mariadb server
+            yum: name=mariadb-server state=latest
+            when: ansible_distribution=="RedHat"
+            notify:
+                    - start mariadb
+
+  handlers:
+          - name: start mysql
+            service: name=mysql state=started
+
+          - name: start mariadb
+            service: name=mariadb state=started
+
+=====================================================================================
+---
+- hosts: all
+  gather_facts: false
+  tasks:
+          - ping:
+
+=====================================================================================
+Ansible Variables
+---
+- hosts: all
+  become: true
+  vars:
+          pack1: net-tools
+          pack2: wget
+  tasks:
+          - name: install package "{{pack1}}"
+            yum : name="{{pack1}}" state=latest
+            when: ansible_distribution=="RedHat"
+
+          - name: install package "{{pack2}}"
+            apt : name="{{pack2}}" state=latest
+            when: ansible_distribution=="Ubuntu"
+
+=====================================================================================
+vars_prompt
+---
+- hosts: webserver
+  become: true
+  vars_prompt:
+          - name: pack_name
+            prompt: Give Package Name
+            private: no
+  tasks:
+          - name: install package {{pack_name}}
+            apt: name="{{pack_name}}" state=latest
+
+=====================================================================================
+Ansible loops [copying files]
+---
+- hosts: all
+  become: true
+  tasks:
+          - name: copy files
+            copy:
+                    src: /root/files/{{item}}
+                    dest: /tmp/{{item}}
+            with_items:
+                    - abc1.txt
+                    - abc2.txt
+                    - abc3.txt
+
+=====================================================================================
+Ansible loops [add multiple users]
+---
+- hosts: all
+  become: true
+  tasks:
+          - name: create new group
+            group: name=sales state=present
+
+          - name: add user {{item}}
+            user: name={{item}} groups=sales state=present
+            with_items:
+                    - abhinay
+                    - anuja
+                    - aboli
+
+=====================================================================================

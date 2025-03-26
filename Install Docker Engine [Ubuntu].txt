@@ -1,0 +1,28 @@
+Install Docker Engine [Ubuntu]
+
+Step - 1: Uninstall Old Version
+sudo apt-get remove docker docker-engine
+
+Step - 2: Add GPG key for Docker Repository
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+Step - 3: Add the Docker Repository
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+Step - 4: Update the package
+sudo apt-get update -y
+
+Step - 5: Install Docker
+sudo apt-get install docker-ce -y
+
+Step - 6: To verify docker Status
+sudo systemctl status docker
+
+Step - 7: Run Docker command to check if it is working
+docker --version
+
+Step - 8: Add your user to the docker group
+sudo usermod -aG docker $USER
+
+Step - 9: Restart the system
+sudo init 6
