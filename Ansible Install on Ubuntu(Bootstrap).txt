@@ -1,7 +1,4 @@
-#!bin/bash
-apt-get update -y
-apt-add-repository ppa:ansible/ansible
-apt-get update -y
-apt-get install ansible -y
-cp /etc/ansible/ansible.cfg /root/ansible.cfg
-cp /etc/ansible/hosts /root/hosts
+sudo apt update
+$ sudo apt install software-properties-common
+$ sudo add-apt-repository --yes --update ppa:ansible/ansible
+$ sudo apt install ansible
